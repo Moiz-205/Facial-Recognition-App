@@ -1,6 +1,7 @@
 # gitignores
 .face/
 face-recog.py
+design.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
