@@ -5,6 +5,10 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 KNOWN_DIR = os.path.join(PROJECT_DIR, "known_faces")
 UNKNOWN_DIR = os.path.join(PROJECT_DIR, "unknown_faces")
 
+
+## images extensions cases
+VALID_EXTENSIONS = ('.png', '.jpg', '.jpeg')
+
 ## settings
 # face distance threshold setting
 THRESHOLD = 0.50
