@@ -13,7 +13,7 @@ def load_known_faces(known_dir=KNOWN_DIR):
 
     for file_name in files:
         if not file_name.lower().endswith(VALID_EXTENSIONS):
-            print(f'No images found in {known_dir}.')
+            # print(f'No images found in {known_dir}.')
             continue
         path = os.path.join(known_dir, file_name)
         name = os.path.splitext(file_name)[0]
