@@ -11,7 +11,7 @@ VALID_EXTENSIONS = ('.png', '.jpg', '.jpeg')
 
 ## settings
 # face distance threshold setting
-THRESHOLD = 0.50
+THRESHOLD = 0.40
 # seconds for saving an unknown faces
 COOLDOWN_SEC = 3
 
@@ -35,3 +35,8 @@ COLORS = {
 FONT = 1
 FONT_SCALE = 0.7
 FONT_THICK = 2
+
+## deepface constant settings
+DEEPFACE_MODEL = "VGG-Face"     # basic face recognition model
+DEEPFACE_DETECTOR = "opencv"    # framework for face detection
+DEEPFACE_DISTANCE = "cosine"    # metric for face detection
