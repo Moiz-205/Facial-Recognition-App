@@ -1,19 +1,21 @@
 import cv2
 from config import KNOWN_DIR
-from core.loader import load_known_faces
-from core.recognizer import recognize_face
+from core.loader import check_known_faces
+from core.recognizer import recognize_face, get_confidence
 from core.saver import save_unknown_face
 from camera.stream import open_camera, read_frame, close_camera
 from ui.render import render_frame
-import face_recognition
 
 
 def main():
-    known_faces = load_known_faces(KNOWN_DIR)
+    if not check_known_faces(KNOWN_DIR):
+        print('No faces found in known_dir.')
+        return None
+
     capture = open_camera()
 
     if capture is None:
-        return
+        return None
 
     while True:
         frame, resized_rgb = read_frame(capture)
@@ -21,28 +23,24 @@ def main():
         if frame is None:
             break
 
-        face_locations = face_recognition.face_locations(resized_rgb)
-        face_encodings = face_recognition.face_encodings(resized_rgb, face_locations)
+        name, distance = recognize_face(resized_rgb)
 
-        results = []
+        if distance is not None:
+            confidence = get_confidence(distance)
+        else:
+            confidence = 'unknown'
 
-        for face_encoding in face_encodings:
-            name, distance, confidence = recognize_face(face_encoding, known_faces)
-            results.append((name, distance, confidence))
+        results = [(name, distance, confidence)]
+        face_locations = []
 
         frame = render_frame(frame, face_locations, results)
 
-        for i in range(len(results)):
-            name, distance, confidence = results[i]
-            top, right, bottom, left   = face_locations[i]
+        if name == "Unknown":
+            save_unknown_face(frame=frame, top=0, right=0, bottom=0, left=0)
 
-            if name == "Unknown":
-                scale = int(1 / 0.25)
-                save_unknown_face(frame, top * scale, right * scale, bottom * scale, left * scale)
+        cv2.imshow("Face Recognition (Press Q to Exit)", frame)
 
-        cv2.imshow("Face Recognition (Press A to Exit)", frame)
-
-        if cv2.waitKey(10) == ord("a"):
+        if cv2.waitKey(10) == ord("q"):
             break
 
     close_camera(capture)
