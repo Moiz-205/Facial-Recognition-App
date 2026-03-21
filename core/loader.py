@@ -1,30 +1,25 @@
 import os
-import face_recognition
 from config import KNOWN_DIR, VALID_EXTENSIONS
 
-def load_known_faces(known_dir=KNOWN_DIR):
+def check_known_faces(known_dir=KNOWN_DIR):
     """
-    loads and encodes known face images from known_faces directory.
-    return a dict known_faces = {name: enconding}
+    checks for known_faces directory exist or not and does
+    it has images or not.
     """
-    known_faces = {}
+    if not os.path.exists(known_dir):
+        print(f'Directory {known_dir} not found.')
+        return False
 
     files = os.listdir(known_dir)
+    valid = []
 
     for file_name in files:
-        if not file_name.lower().endswith(VALID_EXTENSIONS):
-            # print(f'No images found in {known_dir}.')
-            continue
-        path = os.path.join(known_dir, file_name)
-        name = os.path.splitext(file_name)[0]
-        image = face_recognition.load_image_file(path)
-        encodings = face_recognition.face_encodings(image)
+        if file_name.lower().endswith(VALID_EXTENSIONS):
+            valid.append(file_name)
 
-        if not encodings:
-            print(f'No face found in {file_name}.')
-            continue
-
-        known_faces[name] = encodings[0]
-        print(f'Encodings loaded: {name}')
-
-    return known_faces
+    if not valid:
+        print(f'No images found in {known_dir}')
+        return False
+    else:
+        print(f'Found {len(valid)} known faces images: {valid}')
+        return True

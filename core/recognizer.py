@@ -1,6 +1,7 @@
-import numpy as np
-import face_recognition
-from config import THRESHOLD, CONFIDENCE_BANDS
+import os
+from deepface import DeepFace
+from config import KNOWN_DIR, THRESHOLD, CONFIDENCE_BANDS
+from config import DEEPFACE_MODEL, DEEPFACE_DETECTOR, DEEPFACE_DISTANCE
 
 def get_confidence(distance):
     """
@@ -16,23 +17,35 @@ def get_confidence(distance):
 
     return 'unknown'
 
-def recognize_face(face_encoding, known_faces):
+def recognize_face(frame):
     """
-    compares face enconding against all known faces.
-    return name, distance and confidence
+    captures a frame and checks against all known_faces directory.
+    returns either (name, distance) if face is found.
+    or ('unknown', None) if no face is found.
     """
-    names = list(known_faces.keys())
-    encodings = list(known_faces.values())
+    try:
+        results = DeepFace.find(
+            img_path=frame,
+            db_path=KNOWN_DIR,
+            model_name=DEEPFACE_MODEL,
+            detector_backend=DEEPFACE_DETECTOR,
+            distance_metric=DEEPFACE_DISTANCE,
+            enforce_detection=False,
+            silent=True
+        )
 
-    distance = face_recognition.face_distance(encodings, face_encoding)
-    best_index = int(np.argmin(distance))
-    best_dist = float(distance[best_index])
+        if not results or len(results[0]) == 0:
+            return 'Unknown', None
 
-    if best_dist < THRESHOLD:
-        name = names[best_index]
-    else:
-        name = 'unknown'
+        best_match = results[0].iloc[0]     # type: ignore
+        distance = float(best_match[f'{DEEPFACE_MODEL}_{DEEPFACE_DISTANCE}'])
 
-    confidence = get_confidence(best_dist)
+        if distance > THRESHOLD:
+            return 'Unknown', distance
 
-    return name, best_dist, confidence
+        name = os.path.splitext(os.path.basename(best_match['identity']))[0]
+        return name, distance
+
+    except Exception as e:
+        print(f'Recognition failed: {e}')
+        return 'Unknown', None
